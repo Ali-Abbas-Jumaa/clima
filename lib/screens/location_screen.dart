@@ -21,16 +21,25 @@ class _LocationScreenState extends State<LocationScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    updateUI();
+    updateUI(widget.weatherData);
   }
 
-  void updateUI() {
-    weatherMessage =
-        weatherModel.getMessage(widget.weatherData['main']['temp'].toInt());
-    temperature = widget.weatherData['main']['temp'].toInt().toString();
-    city = widget.weatherData['name'].toString();
-    weatherIcon =
-        weatherModel.getWeatherIcon(widget.weatherData['weather'][0]['id']);
+  void updateUI(weatherData) {
+    setState(() {
+      if (weatherData == null) {
+        weatherMessage = "Unable to get weather data";
+        temperature = "0";
+        city = "";
+        weatherIcon = "Error";
+        return;
+      }
+      weatherMessage =
+          weatherModel.getMessage(weatherData['main']['temp'].toInt());
+      temperature = weatherData['main']['temp'].toInt().toString();
+      city = weatherData['name'].toString();
+      weatherIcon =
+          weatherModel.getWeatherIcon(weatherData['weather'][0]['id']);
+    });
   }
 
   @override
@@ -55,7 +64,11 @@ class _LocationScreenState extends State<LocationScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   FlatButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      var weatherData =
+                          await WeatherModel().getLocationWeather();
+                      updateUI(weatherData);
+                    },
                     child: Icon(
                       Icons.near_me,
                       size: 50.0,
